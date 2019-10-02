@@ -1,0 +1,263 @@
+:root {
+    --site-primary-darkest: #250000;
+    --site-primary-darker: #490000;
+    --site-primary-dark: #6E0000;
+    --site-primary: #b01616;
+    --site-primary-light: #A24D4D;
+    --site-primary-lighter: #CA9999;
+    --site-primary-lightest: #F2E6E6;
+
+    --site-white-darkest: #4C4C4C;
+    --site-white-darker: #989898;
+    --site-white-dark: #E5E5E5;
+    --site-white: #FEFEFE;
+    --site-white-light: #efefef;
+    --site-white-lighter: #fff;
+    --site-white-lightest: #fff;
+
+    --site-dark-darkest: #121212;
+    --site-dark-darker: #363636;
+    --site-dark-dark: #696969;
+    --site-dark: #9b9b9b;
+    --site-dark-light: #bdbdbd;
+    --site-dark-lighter: #dedede;
+    --site-dark-lightest: #dfdfdf;
+
+    --site-blue: #0F2094;
+    --site-red: #DC0002;
+
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    height: 100vh;
+    width: 100%;
+    overflow-y: scroll;
+    margin: 0;
+    background-color: var(--site-white-dark);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+    display: block;
+}
+
+.wrapper {
+    position: relative;
+    top: 0;
+    height: 100vh;
+    overflow: scroll;
+}
+
+.main-header {
+    text-align: center;
+    position: fixed;
+    z-index: 999;
+    width: 100%;
+    width: 100vw;
+    display: flex;
+    background-color: var(--site-white);
+}
+
+
+.text-site-primary {
+    color: var(--site-primary);
+}
+
+.background-site-primary {
+    background-color: var(--site-primary);
+}
+
+.border-site-primary {
+    border-color: var(--site-primary);
+}
+
+
+/*  AppBar */
+
+.appbar {
+    position: absolute;
+    right: 0;
+    left: 0;
+    height: 64px;
+    overflow: hidden;
+    transform: none;
+    z-index: 999;
+}
+
+.appbar-top {
+    top: 0;
+    padding-top: 9px;
+    display: flex;
+    z-index: 10000;
+    font-size: 1.3em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.appbar-top.background-site-red::after {
+    content: '';
+    background-color: var(--site-red);
+}
+
+.appbar-top.background-site-blue::after {
+    content: '';
+    background-color: var(--site-blue);
+}
+
+
+.appbar-bottom {
+    top: calc(100vh - 56px);
+}
+
+.appbar::after {
+    content: '';
+    position: absolute;
+    z-index: -10;
+}
+
+.appbar.background-site-blue::after {
+    box-shadow: 0px 0px 0px 5000px var(--site-blue);
+}
+
+.appbar.background-site-red::after {
+    box-shadow: 0px 0px 0px 5000px var(--site-red);
+}
+
+.appbar.background-site-white::after {
+    box-shadow: 0px 0px 0px 5000px var(--site-white-lightest);
+}
+
+.appbar-bottom.appbar-right-fab-inset::after,
+.appbar-bottom.appbar-center-fab-inset::after,
+.appbar-top.appbar-right-fab-inset::after,
+.appbar-top.appbar-center-fab-inset::after {
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 1000px;
+    width: 64px;
+    height: 64px;
+}
+
+.appbar-top.appbar-right-fab-inset::after,
+.appbar-top.appbar-center-fab-inset::after {
+    top: 32px;
+}
+
+.appbar-bottom.appbar-right-fab+.btn-floating,
+.appbar-bottom.appbar-center-fab+.btn-floating,
+.appbar-top.appbar-right-fab+.btn-floating,
+.appbar-top.appbar-center-fab+.btn-floating,
+.appbar-bottom.appbar-right-fab-inset+.btn-floating,
+.appbar-bottom.appbar-center-fab-inset+.btn-floating,
+.appbar-top.appbar-right-fab-inset+.btn-floating,
+.appbar-top.appbar-center-fab-inset+.btn-floating {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    background-color: var(--site-dark-darkest);
+    color: var(--site-white-lightest);
+    border: none;
+    z-index: 999;
+}
+
+.appbar-bottom.appbar-right-fab-inset+.btn-floating,
+.appbar-bottom.appbar-center-fab-inset+.btn-floating,
+.appbar-top.appbar-right-fab-inset+.btn-floating,
+.appbar-top.appbar-center-fab-inset+.btn-floating {
+    background-color: var(--site-white-lightest);
+    color: var(--site-dark-darkest);
+}
+
+
+.appbar-top.appbar-right-fab+.btn-floating,
+.appbar-top.appbar-center-fab+.btn-floating,
+.appbar-top.appbar-right-fab-inset+.btn-floating,
+.appbar-top.appbar-center-fab-inset+.btn-floating {
+    bottom: auto;
+    top: 28px;
+}
+
+.appbar-top.appbar-right-fab::after,
+.appbar-bottom.appbar-right-fab::after {
+    left: 86%;
+}
+
+.appbar-top.appbar-right-fab+.btn-floating,
+.appbar-bottom.appbar-right-fab+.btn-floating {
+    left: 86%;
+}
+
+.btn-floating .fas,
+.btn-floating .far {
+    font-size: 1.25em;
+}
+
+/* should be invoked when 
+        
+            - input field in focus so keyboard can be seen 
+            - when navigation drawer displayed
+            - possibly when list is being scrolled
+
+        */
+.hide-appbar .appbar-bottom {
+    display: none;
+}
+
+.appbar ul,
+.appbar ol {
+    list-style: none;
+    padding-left: 12px;
+}
+
+.appbar li {
+    display: inline-block;
+    margin: 3px 5px;
+    text-align: center;
+    font-size: 1.25em;
+    line-height: 48px;
+    padding-top: 6px;
+    padding-left: 0;
+    padding-right: 18px;
+}
+
+.appbar .fas,
+.appbar .far,
+.appbar a,
+.appbar a ::before,
+.appbar a ::after {
+    color: var(--site-white);
+    text-decoration: none;
+}
+
+.appbar-child-nav-left {
+    position: absolute;
+    left: 15px;
+}
+
+.appbar-child-nav-right {
+    position: absolute;
+    right: 15px;
+}
+
+[class*='appbar-child-nav-'] {
+    margin-top: 6px;
+}
+
+[class*='appbar-child-nav-'] .fas,
+[class*='appbar-child-nav-'] .far {
+    text-align: center;
+    font-size: 1.25em;
+    color: var(--site-white-lightest);
+    line-height: 1.5em;
+    margin-top: 6px;
+}
+
+/* appbar */

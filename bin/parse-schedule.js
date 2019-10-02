@@ -394,7 +394,7 @@ function parseSpeakers() {
 
                     if ( session[ _speakerFields[ index ] ] && session[ _speakerFields[ index ] ] !== "" ) {
 
-                        speakers.push( {
+                        let speaker = {
                             "name": session[ _speakerFields[ index ] ],
                             "mugshot": session[ 46 ] || "",
                             "email": "",
@@ -405,9 +405,16 @@ function parseSpeakers() {
                                 "linkedin": "",
                                 "youtube": ""
                             },
+                            "display_mugshot": true,
                             "bio": "",
                             "sessions": []
-                        } );
+                        };
+
+                        speaker.avatar_letters = getInitials( speaker.name );
+
+                        speaker.display_mugshot = speaker.mugshot !== "";
+
+                        speakers.push( speaker );
 
                     }
                 }
@@ -440,6 +447,11 @@ function parseSpeakers() {
         JSON.stringify( speakers ), true );
 
 }
+
+function getInitials( str ) {
+    return str.replace( " - ", " " ).split( " " ).map( ( n ) => n[ 0 ] ).join( "" ).substring( 0, 2 ).toUpperCase();
+}
+
 
 function onlyUnique( value, index, self ) {
     return self.indexOf( value ) === index;
