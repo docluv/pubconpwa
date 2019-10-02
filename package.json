@@ -1,0 +1,28 @@
+{
+    "name": "truck_stock_website_demo",
+    "version": "0.0.1",
+    "description": "Truck Stock App Web Platform",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "http-server public/www/ -p 1400 -c -i",
+        "start-admin": "http-server admin/www/ -p 1401 -c -i"
+    },
+    "author": "Chris Love",
+    "private": true,
+    "devDependencies": {
+        "del": "~3.0.0",
+        "generate-schema": "*",
+        "glob": "^7.1.4",
+        "jsdom": "*",
+        "json-forms": "*",
+        "lodash": "*",
+        "matchdep": "*",
+        "mime-types": "*",
+        "mkdirp": "*",
+        "mustache": "*",
+        "ncp": "^2.0.0",
+        "strip-bom": "*",
+        "yargs": "*"
+    }
+}
