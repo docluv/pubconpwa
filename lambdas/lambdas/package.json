@@ -1,0 +1,17 @@
+{
+    "name": "pubcon",
+    "version": "0.1.0",
+    "main": "index.js",
+    "author": "Chris Love",
+    "private": true,
+    "dependencies": {
+        "aws-sdk": "*",
+        "lodash": "*",
+        "mustache": "*",
+        "dynamodb": "*",
+        "@hapi/joi": "*",
+        "faker": "*",
+        "strip-bom": "*",
+        "mime-types": "*"
+    }
+}

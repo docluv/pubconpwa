@@ -2,14 +2,14 @@
 <html lang="en">
 
 <head>
-    <title>PubCon Scheudle Progressive Web App</title>
+    <title>PubCon Schedule Progressive Web App</title>
     <meta name="description" content="">
 
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/mdb.min.css" rel="stylesheet">
     <link href="css/animate.min.css" rel="stylesheet">
     <link href="css/mdc.snackbar.min.css" rel="stylesheet">
-    <link href="css/addtohomescreen.min.css" rel="stylesheet">
+    <link href="css/addtohomescreen.css" rel="stylesheet">
     <link href="css/site.css" rel="stylesheet">
 
     <meta name="mobile-web-app-capable" content="yes">
@@ -64,7 +64,80 @@
 
 <body>
 
-    [You Page Content Goes Here]
+    <div class="navbar navbar-expand-lg navbar-light bg-white fixed-top " role="navigation">
+        <div class="navbar-header">
+            <button class="navbar-toggler" type="button" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
+        <div>
+            <a class="navbar-brand floar-right" href="/">
+                <img srcset="img/pubcon-logo-1200x334.png, img/pubcon-logo-992x276.png 992w,img/pubcon-logo-768x214.png 768w,img/pubcon-logo-576x160.png 576w,img/pubcon-logo-460x128.png 460w,img/pubcon-logo-320x89.png 320w"
+                    src="img/pubcon-logo-1200x334.png" sizes="(max-width: 736px) 60vw, 360px" alt="PubCon">
+            </a>
+        </div>
+    </div>
+
+    <div class="page-content">
+        <%template%>
+    </div>
+
+    <aside class="navigation-panel">
+
+        <div class="container">
+            <div class="row">
+                <div class="col-12 form-search form-horizontal">
+                    <div class="form-group">
+                        <input type="search" class="search-query" placeholder="Search">
+                        <button type="submit" class="btn">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="facet">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <input type="checkbox" name="cb0830">
+                        <label for="cb0830" value="08:30" class="big-check">8:30</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <input type="checkbox" name="cb1000">
+                        <label for="cb1000" value="10:00" class="big-check">10:00</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <input type="checkbox" name="cb1130">
+                        <label for="cb1130" value="11:30" class="big-check">11:30</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <input type="checkbox" name="cb1200">
+                        <label for="cb1200" value="12:00" class="big-check">12:00</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <input type="checkbox" name="cb1330">
+                        <label for="cb1330" value="13:30" class="big-check">1:30</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <input type="checkbox" name="cb1500">
+                        <label for="cb1500" value="15:00" class="big-check">3:00</label>
+                    </div>
+                </div>
+            </div>
+            <div class="row flex-center">
+                <button class="btn btn-light btn-my-sessions">My Sessions</button>
+            </div>
+        </div>
+    </aside>
 
     <div class="modal fade modal-filter-sessions" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-dialog-centered" role="document">
@@ -110,7 +183,6 @@
         </div>
     </div>
 
-
     <div class="ath-container banner-bottom-center">
         <div class="ath-banner">
             <div class="ath-banner-cell">
@@ -137,7 +209,18 @@
         </div>
     </div>
 
-    <script src="js/addtohomescreen.min.js" type="application/javascript"></script>
+    <script src="js/libs/addtohomescreen.min.js" type="application/javascript"></script>
+    <script src="js/libs/localforage.min.js" type="application/javascript"></script>
+    <script src="js/libs/mustache.min.js" type="application/javascript"></script>
+    <script src="js/app/services/utils.js" type="application/javascript"></script>
+    <script src="js/app/services/data.js" type="application/javascript"></script>
+    <script src="js/app/services/sessions.js" type="application/javascript"></script>
+    <script src="js/app/services/speakers.js" type="application/javascript"></script>
+    <script src="js/app/ui/component.base.js" type="application/javascript"></script>
+    <script src="js/app/ui/snackbar.js" type="application/javascript"></script>
+    <script src="js/app/services/sw_message.js" type="application/javascript"></script>
+    <script src="js/app/app.js" type="application/javascript"></script>
+    <script src="js/app/controllers/search.js" type="application/javascript"></script>
 
 </body>
 

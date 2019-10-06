@@ -1,12 +1,11 @@
 {
-    "name": "truck_stock_website_demo",
+    "name": "pubcon_pwa",
     "version": "0.0.1",
-    "description": "Truck Stock App Web Platform",
+    "description": "PubCon PWA",
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "http-server public/www/ -p 1400 -c -i",
-        "start-admin": "http-server admin/www/ -p 1401 -c -i"
+        "start": "http-server public/ -p 27123 -c -i"
     },
     "author": "Chris Love",
     "private": true,

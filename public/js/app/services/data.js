@@ -13,8 +13,6 @@ a URL request or a messaging routine
 
     pubcon.utils.nameSpace( "pubcon.data" );
 
-    var _tennantId;
-
     var _STALE_KEY = "-expires",
         MAX_LIST_CACHE = 15;
 
@@ -76,9 +74,9 @@ a URL request or a messaging routine
 
     }
 
-    function getItems( options, apiURL, ITEM_KEY ) {
+    function getItems( options ) {
 
-        return getLocalItems( options, ITEM_KEY )
+        return getLocalItems( options )
             .then( function ( items ) {
 
                 if ( ( items && items.length > 0 ) && !options.forceUpdate ) {
@@ -88,11 +86,7 @@ a URL request or a messaging routine
                     //the apiURL should be completed before this layer
                     //should include all queryString parameters to drive the 
                     //API request
-                    return pubcon.http.authorized( {
-                            "method": "GET",
-                            "mode": "cors",
-                            "url": apiURL
-                        } )
+                    return fetch( options.url )
                         .then( function ( response ) {
 
                             if ( response.ok ) {
@@ -108,7 +102,7 @@ a URL request or a messaging routine
 
                             if ( items.length && items.length > 0 ) {
 
-                                return saveLocalItems( items, options.tennantId, ITEM_KEY );
+                                return saveLocalItems( items, options );
 
                             } else {
 
@@ -130,7 +124,7 @@ a URL request or a messaging routine
             return Promise.reject( "no item object supplied" );
         }
 
-        _tennantId = options.tennantId;
+
 
         options.body.date_updated = new Date().toISOString();
 
@@ -153,8 +147,7 @@ a URL request or a messaging routine
             .then( function ( resp ) {
 
                 return getItems( {
-                    "forceUpdate": true,
-                    "tennantId": _tennantId
+                    "forceUpdate": true
                 }, apiURL, ITEM_KEY );
 
             } )
@@ -165,8 +158,6 @@ a URL request or a messaging routine
     }
 
     function deleteItem( options, apiURL, ITEM_KEY ) {
-
-        _tennantId = options.tennantId;
 
         return pubcon.http.authorized( {
                 "method": "DELETE",
@@ -188,32 +179,20 @@ a URL request or a messaging routine
     //cache items in IDB to keep data as close as possible to the glass
     function getLocalItems( options, ITEM_KEY ) {
 
-        //should provide a tennant filter since even with the 
-        //super user we only want to display items based on the 
-        //specific tennant. The getLocalItems will skip this filter
-        //if null
-        _tennantId = options.tennantId;
-
-        if ( !_tennantId && !options.noTennant ) {
-            throw "no tennant supplied";
-        } else if ( !_tennantId ) {
-            _tennantId = "";
-        }
-
         var dt = new Date();
 
-        return localforage.getItem( _tennantId + ITEM_KEY + _STALE_KEY )
+        return localforage.getItem( ITEM_KEY + _STALE_KEY )
             .then( function ( expires ) {
 
                 if ( expires >= dt ) {
 
-                    return localforage.getItem( _tennantId + ITEM_KEY );
+                    return localforage.getItem( ITEM_KEY );
 
                 } else {
 
-                    return localforage.removeItem( _tennantId + ITEM_KEY )
+                    return localforage.removeItem( ITEM_KEY )
                         .then( function () {
-                            return localforage.removeItem( _tennantId + ITEM_KEY + _STALE_KEY );
+                            return localforage.removeItem( ITEM_KEY + _STALE_KEY );
                         } );
 
                 }
@@ -222,13 +201,11 @@ a URL request or a messaging routine
 
     }
 
-    function saveLocalItems( items, tennantId, ITEM_KEY, expires ) {
+    function saveLocalItems( items, options ) {
 
-        tennantId = tennantId || _tennantId;
+        var expires = options.expires || MAX_LIST_CACHE;
 
-        expires = expires || MAX_LIST_CACHE;
-
-        return localforage.setItem( tennantId + ITEM_KEY, items )
+        return localforage.setItem( options.item_key, items )
             .then( function () {
 
                 var dt = new Date();
@@ -236,7 +213,7 @@ a URL request or a messaging routine
                 dt.setMinutes( dt.getMinutes() + expires );
 
                 return localforage
-                    .setItem( tennantId + ITEM_KEY + _STALE_KEY, dt );
+                    .setItem( options.item_key + _STALE_KEY, dt );
 
             } )
             .then( function () {
