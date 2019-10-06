@@ -1,7 +1,8 @@
 const fs = require( "fs" ),
     path = require( "path" ),
     utils = require( "./utils" ),
-    utf8 = "utf-8";
+    utf8 = "utf-8",
+    utf16 = "utf16";
 
 
 let schedule = utils.readFile( "sessions-pubcon90.txt" );
@@ -296,6 +297,23 @@ var sessions = [],
         }
     };
 
+function calcTime( sessionDate, strTime ) {
+
+    let t = times[ strTime ];
+
+    return {
+        "start": new Date( "10/" +
+            sessionDate + "/2019 " +
+            t.start + " AM PST " ),
+        "end": new Date( "10/" +
+            sessionDate + "/2019 " +
+            t.end + " AM PST " ),
+        "startStr": t.start,
+        "endStr": t.end
+    };
+
+}
+
 
 function parseSessions() {
 
@@ -314,6 +332,8 @@ function parseSessions() {
             session[ 8 ] = "";
         }
 
+        let session_speakers = session.slice( 14, 19 );
+
         try {
 
             if ( session[ 1 ] !== undefined &&
@@ -327,17 +347,31 @@ function parseSessions() {
                     session[ 7 ].indexOf( "Keynote" ) === -1 &&
                     session[ 8 ].indexOf( "Track" ) === -1 ) ) {
 
-                sessions.push( {
+                let _session = {
+                    "assetId": utils.randomId(),
                     "title": session[ 6 ],
                     "location": session[ 8 ],
                     "moderator": session[ 10 ],
                     "date": "10/" + session[ 3 ] + "/2019",
-                    "time": times[ session[ 2 ] ], //convert later
+                    "time": calcTime( session[ 3 ], session[ 2 ] ), //convert later
                     "type": session[ 11 ],
-                    "description": session[ 13 ].replace( /<p>|<\/p>|<li>|<\/li>|<br>/, "" ),
-                    "speakers": [ session[ 15 ], session[ 16 ], session[ 17 ], session[ 18 ], session[ 19 ] ],
-                    "img": session[ 46 ]
-                } );
+                    "description": session[ 13 ].replace( /<p>|<\/p>|<li>|<\/li>|<br>/, "" )
+                        .replace( '\"', "" ).replace( '"', "" )
+                        .replace( "	", "" ).replace( '    ', " " )
+                        .replace( "  ", " " )
+                        .replace( "  ", " " )
+                        .replace( "  ", " " )
+                        .replace( "  ", " " ).trim(),
+                    "speakers": getSessionSpeakers( session )
+                };
+
+                if ( session[ 46 ] !== "" ) {
+
+                    _session.img = session[ 46 ].replace( "https://www.pubcon.com/images/", "img/" );
+
+                }
+
+                sessions.push( _session );
 
                 _times.push( parseInt( session[ 2 ], 10 ) );
 
@@ -360,6 +394,34 @@ function parseSessions() {
 
 }
 
+function getSessionSpeakers( session ) {
+
+    let _speakers = speakers.filter( value => {
+
+        return ( value.name === session[ 15 ] ||
+            value.name === session[ 16 ] ||
+            value.name === session[ 17 ] ||
+            value.name === session[ 18 ] ||
+            value.name === session[ 19 ] );
+
+    } );
+
+    let _session_speakers = [];
+
+    _speakers.forEach( speaker => {
+
+        _session_speakers.push( {
+            assetId: speaker.assetId,
+            name: speaker.name,
+            mugshot: speaker.mugshot.replace( "https://www.pubcon.com/images/", "img/" )
+        } );
+
+    } );
+
+    return _session_speakers;
+
+}
+
 function parseSpeakers() {
 
     schedule.forEach( (
@@ -379,8 +441,7 @@ function parseSpeakers() {
 
         try {
 
-            if ( session[ 1 ] !== undefined &&
-                session.length > 20 &&
+            if ( session[ 1 ] !== undefined && session.length > 20 &&
                 (
                     session[ 0 ] !== "Session ID" &&
                     session[ 2 ] !== "0" &&
@@ -395,6 +456,7 @@ function parseSpeakers() {
                     if ( session[ _speakerFields[ index ] ] && session[ _speakerFields[ index ] ] !== "" ) {
 
                         let speaker = {
+                            "assetId": utils.randomId(),
                             "name": session[ _speakerFields[ index ] ],
                             "mugshot": session[ 46 ] || "",
                             "email": "",
@@ -412,7 +474,7 @@ function parseSpeakers() {
 
                         speaker.avatar_letters = getInitials( speaker.name );
 
-                        speaker.display_mugshot = speaker.mugshot !== "";
+                        speaker.display_mugshot = speaker.mugshot !== "";;
 
                         speakers.push( speaker );
 
@@ -475,6 +537,5 @@ function onlyUniqueSpeaker( data ) {
 
 }
 
-
-parseSessions();
 parseSpeakers();
+parseSessions();

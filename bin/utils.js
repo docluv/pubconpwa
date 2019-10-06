@@ -118,11 +118,11 @@ module.exports = {
 
     },
 
-    readFile: function ( src ) {
+    readFile: function ( src, utf ) {
 
         if ( fs.existsSync( src ) ) {
 
-            return stripBom( fs.readFileSync( src, utf8 ) );
+            return stripBom( fs.readFileSync( src, utf || utf8 ) );
 
         } else {
             console.log( path.resolve( src ), "does not exist" );

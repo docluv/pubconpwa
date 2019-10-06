@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>PubCon Scheudle Progressive Web App</title>
+    <meta name="description" content="">
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/mdb.min.css" rel="stylesheet">
+    <link href="css/animate.min.css" rel="stylesheet">
+    <link href="css/mdc.snackbar.min.css" rel="stylesheet">
+    <link href="css/addtohomescreen.min.css" rel="stylesheet">
+    <link href="css/site.css" rel="stylesheet">
+
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Pubcon.love2dev">
+    <meta name="apple-mobile-web-app-title" content="Pubcon.love2dev">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <link rel="apple-touch-icon" href="meta/ios/ios-appicon-120-120.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="meta/ios/ios-appicon-152-152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="meta/ios/ios-appicon-180-180.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="meta/ios/ios-appicon-120-120.png">
+    <link href="meta/ios/apple-touch-startup-image-320x460.png" media="(device-width: 320px)"
+        rel="apple-touch-startup-image">
+    <!-- iPhone (Retina) SPLASHSCREEN-->
+    <link href="meta/ios/apple-touch-startup-image-640x920.png"
+        media="(device-width: 320px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image">
+    <!-- iPad (portrait) SPLASHSCREEN-->
+    <link href="meta/ios/apple-touch-startup-image-768x1004.png"
+        media="(device-width: 768px) and (orientation: portrait)" rel="apple-touch-startup-image">
+    <!-- iPad (landscape) SPLASHSCREEN-->
+    <link href="meta/ios/apple-touch-startup-image-748x1024.png"
+        media="(device-width: 768px) and (orientation: landscape)" rel="apple-touch-startup-image">
+    <!-- iPad (Retina, portrait) SPLASHSCREEN-->
+    <link href="meta/ios/apple-touch-startup-image-1536x2008.png"
+        media="(device-width: 1536px) and (orientation: portrait) and (-webkit-device-pixel-ratio: 2)"
+        rel="apple-touch-startup-image">
+    <!-- iPad (Retina, landscape) SPLASHSCREEN-->
+    <link href="meta/ios/apple-touch-startup-image-2048x1496.png"
+        media="(device-width: 1536px)  and (orientation: landscape) and (-webkit-device-pixel-ratio: 2)"
+        rel="apple-touch-startup-image">
+    <!-- iPhone 6/7/8 -->
+    <link href="/meta/ios/apple-touch-startup-image-750x1334.png"
+        media="(device-width: 375px) and (-webkit-device-pixel-ratio: 2)" rel="apple-touch-startup-image" />
+    <!-- iPhone 6 Plus/7 Plus/8 Plus -->
+    <link href="/meta/ios/apple-touch-startup-image-1242x2208.png"
+        media="(device-width: 414px) and (-webkit-device-pixel-ratio: 3)" rel="apple-touch-startup-image" />
+
+    <meta name="msapplication-starturl" content="/?utm_source=homescreen">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="favicon.ico" rel="shortcut icon">
+    <link rel="icon" type="image/png" href="meta/favicon-16x16.png" sizes="16x16">
+    <link rel="icon" type="image/png" href="meta/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="meta/favicon-96x96.png" sizes="96x96">
+
+    <meta name="theme-color" content="#b01616">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="generator" content="PWA Starter https://pwastarter.love2dev.com/">
+
+    <!-- social networking -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="PubCon Schedule">
+    <meta property="og:description" content="Find the Sessions You Want at the 2019 PubCon">
+    <meta property="og:url" content="Sat, 17 Mar 2019 20:28:34 GMT">
+    <meta property="og:site_name" content="PubCon 2019">
+    <meta property="article:publisher" content="https://www.facebook.com/pubcon/">
+    <meta property="article:section" content="main">
+    <meta property="article:published_time" content="Sat, 17 Mar 2019 20:28:34 GMT">
+    <meta property="article:modified_time" content="Sat, 17 Mar 2019 20:28:34 GMT">
+    <meta property="og:updated_time" content="Sat, 17 Mar 2019 20:28:34 GMT">
+    <meta property="og:image" content="meta/Square310x310Logo.scale-100.png">
+    <meta property="og:image:width" content="310">
+    <meta property="og:image:height" content="310">
+    <meta property="twitter:account_id" content="5658652" />
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:description" content="Find the Sessions You Want at the 2019 PubCon">
+    <meta name="twitter:title" content="PubCon Schedule">
+    <meta name="twitter:site" content="@pubcon">
+    <meta name="twitter:image" content="meta/windows10/Square310x310Logo.scale-100.png">
+    <meta name="twitter:creator" content="@ChrisLove">
+
+</head>
+
+<body>
+
+    [You Page Content Goes Here]
+
+    <div class="modal fade modal-filter-sessions" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Filter/Sort Sessions</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="md-form mb-1 d-flex">
+                        <select class="mdb-select md-form col-12" name="order_status">
+                            <option value="">&nbsp; All</option>
+                            <option value="submitted">&nbsp; Submitted</option>
+                            <option value="review">&nbsp; Review</option>
+                            <option value="fullfillment">&nbsp; Fullfillment</option>
+                            <option value="partial">&nbsp; Partial</option>
+                            <option value="ready">&nbsp; Ready</option>
+                        </select>
+                        <label class="mdb-main-label" for="order_status">Select Order Status</label>
+                    </div>
+                    <div class="md-form mb-1 d-flex">
+                        <input type="search" id="order_search" name="order_search" class="form-control">
+                        <label for="order_search">Search</label>
+                    </div>
+                    <div class="md-form mb-1">
+                        <input placeholder="Start date" type="date" name="start_date_filter"
+                            class="form-control datepicker">
+                        <label for="start_date_filter">Start date</label>
+                    </div>
+                    <div class="md-form mb-1">
+                        <input placeholder="End date" type="date" name="end_date_filter"
+                            class="form-control datepicker">
+                        <label for="end_date_filter">End date</label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-link waves-effect btn-cancel-order mr-3">CANCEL</button>
+                    <button class="btn btn-primary waves-effect btn-filter-order">APPLY</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ath-container banner-bottom-center">
+        <div class="ath-banner">
+            <div class="ath-banner-cell">
+                <img src="imgs/pwa-logo-50x50.png" alt="PWA" class="ath-prompt-logo">
+            </div>
+            <div class="ath-banner-title">
+                <p>Install PubCon?</p>
+            </div>
+            <div class="ath-banner-cell">
+                <button class="btn btn-cancel btn-link">Not Now</button>
+            </div>
+            <div class="ath-banner-cell">
+                <button class="btn btn-install btn-success">Install</button>
+            </div>
+
+        </div>
+    </div>
+    <div class="mdc-snackbar snackbar-confirm animated fadeOut">
+        <div class="mdc-snackbar__surface">
+            <div class="mdc-snackbar__label" role="status" aria-live="polite"></div>
+            <div class="mdc-snackbar__actions">
+                <button type="button" class="mdc-button mdc-snackbar__action">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/libs/addtohomescreen.min.js" type="application/javascript"></script>
+
+
+
+</body>
+
+</html>
