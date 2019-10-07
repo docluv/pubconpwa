@@ -3,7 +3,7 @@
     "use strict";
 
     var self = pubcon.component,
-        UPDATEselfATA = "update-data",
+        UPDATE_DATA = "update-data",
         //initialize Schedule as an array so the search will work in case it is empty ;)
         filteredSessions = [],
         sessionCardTemplate = "",
@@ -69,7 +69,7 @@
         }
 
         pubcon.sw_message.sendMessage( {
-            event: UPDATEselfATA
+            event: UPDATE_DATA
         } );
 
         addToHomescreen( {

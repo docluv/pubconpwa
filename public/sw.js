@@ -13,31 +13,41 @@ const version = "0.01",
         "session/",
         "profile/",
         "about/",
-        "css/pubcon.css",
-        "css/boostrap.min.css",
-        "css/animate.min.css",
+        "img/pubcon-logo-1200x334.png", "img/pubcon-logo-992x276.png", "img/pubcon-logo-768x214.png", "img/pubcon-logo-576x160.png", "img/pubcon-logo-460x128.png", "img/pubcon-logo-320x89.png",
+        "templates/offline.html",
+        "templates/session-list.html",
+        "templates/session.html",
+        "templates/shell.html",
+        "templates/speaker-list.html",
+        "templates/speaker.html",
+        "css/bootstrap.min.css",
         "css/addtohomescreen.css",
         "css/site.css",
         "css/mdb.min.css",
-        "js/app.js",
-        "js/services/data.js",
-        "js/services/sessions.js",
-        "js/services/speakers.js",
-        "js/services/http.js",
-        "js/services/utils.js",
-        "js/services/sw_message.js",
-        "js/controllers/sessions.js",
-        "js/controllers/speakers.js",
-        "js/controllers/session.js",
-        "js/controllers/speaker.js",
-        "js/controllers/profile.js",
+        "js/libs/addtohomescreen.min.js",
+        "js/libs/localforage.min.js",
         "js/libs/mustache.min.js",
-        "js/libs/localforage.min.js"
-    ];
+        "js/app/services/utils.js",
+        "js/app/services/data.js",
+        "js/app/services/sessions.js",
+        "js/app/services/speakers.js",
+        "js/app/services/favorites.js",
+        "js/app/ui/component.base.js",
+        "js/app/ui/favorites.js",
+        "js/libs/share.js",
+        "js/app/services/sw_message.js",
+        "js/app/app.js",
+        "js/app/controllers/search.js"
+    ],
+    SESSION_KEY = "sessions",
+    SPEAKER_KEY = "speakers",
+    FAVORITES_KEY = "favorites",
+    STALE_KEY = "-expires",
+    UPDATE_DATA = "update-data",
+    UPDATE_FAVORITES = "update-favorites",
+    MAX_LIST_CACHE = 120;
 
 class ResponseManager {
-
-    MAX_LIST_CACHE = 15;
 
     //cache items in IDB to keep data as close as possible to the glass
     getLocalItems( ITEM_KEY, STALE_KEY ) {
@@ -574,19 +584,35 @@ class DateManager {
 
 }
 
-
 self.addEventListener( "install", function ( event ) {
 
     console.log( "Installing the service worker!" );
 
     self.skipWaiting();
 
-    caches.open( preCache )
+    event.waitUntil(
+
+        caches.open( preCache )
         .then( cache => {
 
-            cache.addAll( cacheList );
+            cacheList.forEach( url => {
 
-        } );
+                fetch( url )
+                    .then( function ( response ) {
+                        if ( !response.ok ) {
+                            throw new TypeError( 'bad response status - ' + response.url );
+                        }
+                        return cache.put( url, response );
+                    } )
+                    .catch( err => {
+                        console.error( err );
+                    } );
+
+            } );
+
+        } )
+
+    );
 
 } );
 
@@ -609,6 +635,20 @@ self.addEventListener( "activate", function ( event ) {
             return;
 
         } )
+        .then( () => {
+
+            return getTemplates();
+
+        } )
+        .then( () => {
+
+            return updateCachedData();
+
+        } )
+        .then( () => {
+
+            return renderSite();
+        } )
 
     );
 
@@ -618,20 +658,36 @@ self.addEventListener( "fetch", function ( event ) {
 
     event.respondWith(
 
-        fetch( event.request )
+        caches.match( event.request )
+        .then( function ( response ) {
 
-        /* check the cache first, then hit the network */
-        /*
-                caches.match( event.request )
-                .then( function ( response ) {
+            if ( response ) {
+                return response;
+            }
 
-                    if ( response ) {
-                        return response;
+            return fetch( event.request )
+                .then( response => {
+
+                    if ( response && response.ok ) {
+
+                        return caches.open( "pubcon" )
+                            .then( cache => {
+                                return cache.put( event.request, response.clone() );
+                            } )
+                            .then( () => {
+                                return response;
+                            } );
+
+
+                    } else {
+
+                        //offline fallback
                     }
 
-                    return fetch( event.request );
-                } )
-        */
+                } );
+        } )
+
+
     );
 
 } );
@@ -645,6 +701,17 @@ self.addEventListener( "message", event => {
             updateCachedData();
             break;
 
+        case OFFLINE_MSG_KEY:
+
+            toggleOffline( event.data.state );
+
+            break;
+
+        case UPDATE_FAVORITES:
+
+            updatefavorites();
+
+            break;
         default:
 
             console.log( event );
@@ -664,13 +731,204 @@ self.addEventListener( "message", event => {
 */
 
 
-function renderSessions() {}
+function renderSite() {
 
-function renderSpeakers() {}
+    let speakers = [],
+        sessions = [];
 
-function updateCachedData() {}
+    localforage.getItem( SESSION_KEY )
+        .then( results => {
 
+            sessions = results;
 
+            return localforage.getItem( SPEAKER_KEY );
+        } )
+        .then( res => {
+
+            speakers = res;
+
+            let pages = [];
+
+            sessions.forEach( session => {
+
+                pages.push( renderPage( "session/" +
+                    session.assetId + "/", "session", session ) );
+
+            } );
+
+            speakers.forEach( speaker => {
+
+                pages.push( renderPage( "speaker/" +
+                    speaker.assetId + "/", "speaker", speaker ) );
+
+            } );
+
+            pages.push( renderPage( "speakers/", "speakers", {
+                speakers: speakers
+            } ) );
+
+            //render home page
+            pages.push( renderPage( location.origin, "sessions", {
+                sessions: sessions
+            } ) );
+
+            return Promise.all( pages );
+
+        } )
+        .then( results => {
+
+            console.log( "site updated" );
+
+        } )
+        .catch( err => {
+
+            console.error( err );
+
+        } );
+
+}
+
+let templates = {};
+
+/*
+        "templates/shell.html",
+        "templates/speaker-list.html",
+        "templates/speaker.html",
+
+*/
+
+function getTemplates() {
+
+    return getHTMLAsset( "templates/session-list.html" )
+        .then( html => {
+            templates.sessions = html;
+        } )
+        .then( () => {
+
+            return getHTMLAsset( "templates/session.html" )
+                .then( html => {
+                    templates.session = html;
+                } );
+
+        } )
+        .then( () => {
+
+            return getHTMLAsset( "templates/shell.html" )
+                .then( html => {
+                    templates.shell = html;
+                } );
+
+        } )
+        .then( () => {
+
+            return getHTMLAsset( "templates/speaker-list.html" )
+                .then( html => {
+                    templates.speakers = html;
+                } );
+
+        } )
+        .then( () => {
+
+            return getHTMLAsset( "templates/speaker.html" )
+                .then( html => {
+                    templates.speaker = html;
+                } );
+
+        } );
+
+}
+
+function renderPage( slug, templateName, data ) {
+
+    let pageTemplate = templates[ templateName ];
+
+    let template = templates.shell.replace( "<%template%>", pageTemplate );
+
+    pageHTML = Mustache.render( template, data );
+
+    let response = new Response( pageHTML, {
+        headers: {
+            "content-type": "text/html",
+            "date": new Date().toLocaleString()
+        }
+    } );
+
+    return caches.open( "pubcon" )
+        .then( cache => {
+            cache.put( slug, response );
+        } );
+
+}
+
+function updateCachedData() {
+
+    return fetch( "api/sessions.json" )
+        .then( response => {
+
+            if ( response && response.ok ) {
+
+                return response.json();
+
+            } else {
+                throw {
+                    status: response.status,
+                    message: "failed to fetch session data"
+                };
+            }
+
+        } )
+        .then( sessions => {
+
+            return localforage.setItem( SESSION_KEY, sessions );
+
+        } )
+        .then( () => {
+
+            var dt = new Date();
+
+            dt.setMinutes( dt.getMinutes() + MAX_LIST_CACHE );
+
+            return localforage
+                .setItem( SESSION_KEY + STALE_KEY, dt );
+
+        } )
+        .then( () => {
+
+            return fetch( "api/speakers.json" )
+        } )
+        .then( response => {
+
+            if ( response && response.ok ) {
+
+                return response.json();
+
+            } else {
+                throw {
+                    status: response.status,
+                    message: "failed to fetch session data"
+                };
+            }
+
+        } )
+        .then( speakers => {
+
+            return localforage.setItem( SPEAKER_KEY, speakers );
+
+        } )
+        .then( () => {
+
+            var dt = new Date();
+
+            dt.setMinutes( dt.getMinutes() + MAX_LIST_CACHE );
+
+            return localforage
+                .setItem( SPEAKER_KEY + STALE_KEY, dt );
+
+        } );
+
+}
+
+function updatefavorites() {}
 
 function send_message_to_client( client, msg ) {
     return new Promise( function ( resolve, reject ) {
@@ -686,4 +944,19 @@ function send_message_to_client( client, msg ) {
 
         client.postMessage( msg, [ msg_chan.port2 ] );
     } );
+}
+
+function getHTMLAsset( slug ) {
+
+    return caches.match( slug )
+        .then( response => {
+
+            if ( response ) {
+
+                return response.text();
+
+            }
+
+        } );
+
 }

@@ -82,6 +82,11 @@
 
         }
 
+        pubcon.sw_message.sendMessage( {
+            event: "update-favorites"
+        } );
+
+
         return false;
 
     }
