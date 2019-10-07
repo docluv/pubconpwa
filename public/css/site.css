@@ -238,6 +238,22 @@ body {
     transform: translateX(0);
 }
 
+.avatar-circle {
+    margin-left: calc(50% - 22.5px);
+    text-align: center;
+    font-weight: 700;
+    border-radius: 50%;
+    width: 45px;
+    line-height: 45px;
+    height: 45px;
+}
+
+.avatar-thumb {
+    width: 45px;
+    height: 45px;
+}
+
+
 @media (min-width: 768px) {
     .page-content .card {
         width: 46%;

@@ -1,11 +1,8 @@
-const data = require( "../data" );
-
-
 class SpeakerManager {
 
-    constructor() {
+    constructor( data ) {
 
-        this.apiKey = "api/speakers.json";
+        this.data = data;
 
         this.speakerTimesKey = "speaker-times";
         this.savesSpeakers = "save-speakers";
@@ -29,18 +26,36 @@ class SpeakerManager {
 
         }
 
-        return data.getItem( {
-            id: options.id,
-            key: apiKey
-        } );
+        return this.data.getItem( {
+            id: options.id
+        }, apiURL, this.SPEAKER_KEY );
 
     }
 
     getSpeakers() {
 
-        return data.getItems( {
-            key: apiKey
+        return this.data.getItems( {
+            item_key: this.SPEAKER_KEY,
+            url: "api/speakers.json"
         } );
+
+    }
+
+    searchSpeakers( term ) {
+
+        return getSpeakers()
+            .then( speakers => {
+
+                term = term.toLowerCase();
+
+                return speakers.filter( speaker => {
+
+                    return ( speaker.title
+                        .toLowerCase().indexOf( term ) > -1 );
+
+                } );
+
+            } )
 
     }
 

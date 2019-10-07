@@ -1,0 +1,19 @@
+{{#sessions}}
+<div class="card" id="{{assetId}}">
+    <div class="card-body">
+        <h5 class="card-title">{{name}}</h5>
+        {{#display_mugshot}}
+        <img class="rounded-circle mugshot-thumbnail" src="{{mugshot}}" alt="{{name}}" />
+        {{/display_mugshot}}
+        {{^display_mugshot}}
+        <div class="avatar-circle bg-green-dark">{{avatar_letters}}</div>
+        {{/display_mugshot}}
+        <div class="card-list my-1 p-1">
+            {{#sessions}}
+            <p class="card-text">{{title}}</p>
+            <a href="session/{{assetId}}/" class="card-link btn btn-primary float-right">Details</a>
+        </div>
+        {{/sessions}}
+    </div>
+</div>
+{{/sessions}}
