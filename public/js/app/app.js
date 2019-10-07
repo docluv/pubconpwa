@@ -11,7 +11,9 @@
 
     function initialize() {
 
-        initSearch();
+        //        initSearch();
+
+        initAppBar();
 
         if ( "serviceWorker" in navigator ) {
 
@@ -88,6 +90,26 @@
 
     }
 
+    function initAppBar() {
+
+        if ( self.qs( ".appbar-bottom" ) ) {
+
+            self.on( ".appbar-bottom li", "click", function ( e ) {
+
+                e.preventDefault();
+
+                var target = e.currentTarget.getAttribute( "appbar-target" );
+
+                location.href = target;
+
+                return false;
+            } );
+
+        }
+
+    }
+
+
     function send_message_to_sw( msg ) {
 
         if ( navigator.serviceWorker.controller ) {
@@ -95,219 +117,6 @@
         }
     }
 
-
-    // Menu toggle
-    function initMenuToggle() {
-
-        var toggler = self.qs( ".navbar-toggler" );
-
-        toggler.addEventListener( "click", function ( evt ) {
-
-            toggleMenu();
-
-        } );
-
-    }
-
-    function toggleMenu() {
-        /* Choose 992 because that is the break point where BS hides the menu toggle button */
-        if ( document.body.clientWidth < 992 ) {
-
-            document.body.classList.toggle( "menu-toggle" );
-
-        }
-
-    }
-
-    function initMySessions() {
-
-        var btnMySessions = self.qs( ".btn-my-session" );
-
-        btnMySessions.addEventListener( "click", function () {
-
-            pubcon.sessions.getSavedSessions()
-                .then( renderSearchResults );
-
-        } );
-
-    }
-
-    function renderFullSchedule() {
-
-        pubcon.sessions.getFacetedSessions()
-            .then( renderSearchResults );
-
-    }
-
-    function loadSessions() {
-
-        //attempt to load the user's schedule first, then the 'full' schedule
-        pubcon.sessions.getSavedSessions()
-            .then( function ( savedSessions ) {
-
-                if ( savedSessions ) {
-
-                    renderSearchResults( savedSessions );
-
-                } else {
-
-                    renderFullSchedule();
-
-                }
-
-            } );
-
-    }
-
-    /* Session Details */
-
-    function initSessionDetails() {
-
-        var addToScheduleCB = self.qs( ".session-actions label" ),
-            id = parseInt( addToScheduleCB.getAttribute( "value" ), 10 );
-
-        if ( addToScheduleCB ) {
-
-            addToScheduleCB.addEventListener( "click", function ( e ) {
-
-                e.preventDefault();
-
-                toggleSessiontoSchedule( e.target );
-
-            } );
-
-        }
-
-        pubcon.sessions.getSavedSessions()
-            .then( function ( sessions ) {
-
-                sessions = sessions.filter( function ( session ) {
-
-                    return session.id === id;
-
-                } );
-
-                if ( sessions && sessions.length > 0 ) {
-
-                    var cb = self.qs( "[name='cb" + id + "']" );
-                    cb.checked = true;
-                }
-
-            } );
-
-        bindMySessions();
-
-    }
-
-    function toggleSessiontoSchedule( target ) {
-
-        var cbFor = target.getAttribute( "for" ),
-            value = target.getAttribute( "value" ),
-            cb = self.qs( "[name='" + cbFor + "']" );
-
-        if ( cb ) {
-
-            if ( cb.checked ) {
-
-                cb.checked = false;
-                //push to session time filter
-                pubcon.sessions.removeSession( value );
-
-            } else {
-
-                cb.checked = true;
-                //pop from session time filter
-                pubcon.sessions.saveSession( value );
-
-            }
-
-        }
-
-    }
-
-    function bindMySessions() {
-
-        var mySessionsBtn = self.qs( ".btn-my-sessions" );
-
-        mySessionsBtn.addEventListener( "click", function ( e ) {
-
-            e.preventDefault();
-
-            renderMySessions();
-
-            return false;
-
-        } );
-
-    }
-
-    function renderMySessions() {
-
-        return pubcon.sessions.getSavedSessions()
-            .then( renderSearchResults );
-
-    }
-
-    /*faceted search */
-
-    function initFacetedSearch() {
-
-        var csBigChecks = self.qsa( ".navigation-panel .big-check" );
-
-        for ( var index = 0; index < csBigChecks.length; index++ ) {
-
-            initFacetedFilter( csBigChecks[ index ] );
-
-        }
-
-        pubcon.sessions.getSelectedTimes()
-            .then( function ( times ) {
-
-                times.forEach( function ( sessionTime ) {
-
-                    var sessionCB = self.qs( "[name=cb" + sessionTime.replace( ":", "" ) + "]" );
-
-                    sessionCB.checked = true;
-
-                } );
-
-            } );
-
-    }
-
-    function initFacetedFilter( cbLabel ) {
-
-        cbLabel.addEventListener( "click", function ( e ) {
-
-            e.preventDefault();
-
-            var cbFor = e.target.getAttribute( "for" ),
-                value = e.target.getAttribute( "value" ),
-                cb = self.qs( "[name='" + cbFor + "']" );
-
-            if ( cb ) {
-
-                if ( cb.checked ) {
-
-                    cb.checked = false;
-                    //push to session time filter
-                    pubcon.sessions.removeSessionTime( value )
-                        .then( renderFullSchedule );
-
-                } else {
-
-                    cb.checked = true;
-                    //pop from session time filter
-                    pubcon.sessions.addSessionTime( value )
-                        .then( renderFullSchedule );
-
-                }
-
-            }
-
-        } );
-
-    }
 
     /* search */
     function initSearch() {

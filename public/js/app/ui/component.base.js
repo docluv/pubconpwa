@@ -27,6 +27,18 @@
 
         },
 
+        toggleClass: function ( target, className ) {
+
+            target = this.qsa( target );
+
+            for ( var i = 0; i < target.length; i++ ) {
+
+                target[ i ].classList.toggle( className );
+
+            }
+
+        },
+
         fetchAndRenderTemplate: function ( src, data ) {
 
             var self = this;

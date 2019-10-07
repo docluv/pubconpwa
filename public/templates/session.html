@@ -13,6 +13,28 @@
         {{/room}}
         {{^room}}<p class="session-text">TBD</p>{{/room}}
     </div>
+    <div class="session-share-row">
+        <p class="center-text lead">Share This Session With Your Tribe!</p>
+        <button class="btn bg-white text-dark btn-share d-none" share-text="{{description}}" share-title="{{title}}"
+            share-url="{{url}}">
+            <i class="far fa-share fa-5x"></i>
+        </button>
+        <ul class="share-buttons d-none">
+            <li>
+                <a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fpubcon.love2dev.com/session/{{assetId}}&t={{title}}"
+                    rel="noopener" title="Share on Facebook" class="btn btn-social fas fa-facebook" target="_blank"></a>
+            </li>
+            <li>
+                <a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fpubcon.love2dev.com/session/{{assetId}}&text={{title}}"
+                    rel="noopener" class="btn btn-social fas fa-twitter" target="_blank" title="Tweet"></a>
+            </li>
+            <li>
+                <a href="http://www.linkedin.com/shareArticle?mini=true&url=https%3A%2F%2Fpubcon.love2dev.com/session/{{assetId}}&title={{title}}&summary={{Abstract}}"
+                    rel="noopener" target="_blank" title="Share on LinkedIn" class="btn btn-social fas fa-linkedin"></a>
+            </li>
+        </ul>
+    </div>
+
     <div class="session-description">
         {{{description}}}</div>
 </div>

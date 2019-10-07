@@ -7,6 +7,9 @@
         {{/speakers}}
         <p class="card-text">{{time.startStr}} - {{#room}}{{.}}{{/room}}{{^room}}TBD{{/room}}</p>
         <a href="session/{{assetId}}/" class="card-link btn btn-primary float-right">Details</a>
+        <div class="favorite btn-favorite" favorite-id="{{assetId}}">
+            <i class="far fa-star-empty"></i>
+        </div>
     </div>
 </div>
 {{/sessions}}
