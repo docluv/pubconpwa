@@ -4,7 +4,8 @@
 
     pubcon.utils.nameSpace( "pubcon.favorites" );
 
-    var favorites_key = "user_favorites";
+    var favorites_key = "user_favorites",
+        UPDATE_FAVORITES = "update-favorites";
 
     function getFavorites() {
 
