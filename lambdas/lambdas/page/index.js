@@ -1,45 +1,51 @@
-const awsUtils = require( "../libs/aws-utils" ),
+const //fileMgr = require( "../libs/aws-utils" ),
+    fileMgr = require( "../localhost" ),
     _utils = require( "../libs/utils" ),
     mustache = require( "mustache" ),
     Bucket = "pubcon.love2dev.com",
     templates = {
         "sessions": "templates/session-list.html",
         "session": "templates/session.html",
-        "speakers": "templates/speal-list.html",
-        "speaker": "templates/speaker-list.html"
+        "speakers": "templates/speaker-list.html",
+        "speaker": "templates/speaker.html"
     };
 
+let shell = "";
 
-exports = {
+fileMgr.getFile( {
+        Bucket: Bucket,
+        key: "templates/shell.html"
+    } )
+    .then( s => {
 
-    renderPage = function ( slug, templateName, data ) {
+        shell = s;
 
-        awsUtils.getFile( {
+    } );
+
+
+exports.renderPage = function ( slug, templateName, data ) {
+
+    fileMgr.getFile( {
+            Bucket: Bucket,
+            key: templates[ templateName ]
+        } )
+        .then( pageTemplate => {
+
+            let template = shell.replace( "<%template%>", pageTemplate );
+
+            return mustache.render(
+                template, data );
+
+        } )
+        .then( pageHTML => {
+
+            return fileMgr.uploadFile( {
                 Bucket: Bucket,
-                key: templates[ templateName ]
-            } )
-            .then( pageTemplate => {
-
-                return mustache.render( pageTemplate, data );
-
-            } )
-            .then( pageHTML => {
-
-                return aws.uploadFile( {
-                        Bucket: Bucket,
-                        key: slug + "index.html",
-                        body: pageHTML,
-                        gzip: true
-                    } )
-                    .then( () => {
-
-                        return sendNotifications( page );
-
-                    } );
-
+                key: slug + "/index.html",
+                body: pageHTML,
+                gzip: true
             } );
 
-
-    }
+        } );
 
 };

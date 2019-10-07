@@ -1,6 +1,7 @@
 //fetch & store data files in S3
 
-const awsUtils = require( "../libs/aws-utils" ),
+const //fileMgr = require( "../libs/aws-utils" ),
+    fileMgr = require( "../localhost" ),
     _utils = require( "../libs/utils" );
 
 
@@ -46,13 +47,13 @@ exports.getItem = function ( options ) {
 
 exports.getItems = function ( options ) {
 
-    return getFile( {
+    return fileMgr.getFile( {
             "Bucket": "pubcon.love2dev.com",
             "key": options.key
         } )
         .then( response => {
 
-            return JSON.parse( body );
+            return JSON.parse( response );
 
         } );
 };

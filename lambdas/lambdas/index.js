@@ -1,5 +1,5 @@
 const page = require( "./page" ),
-    session = require( "./sessions" ),
+    session = require( "./session" ),
     speaker = require( "./speaker" );
 
 
@@ -15,9 +15,9 @@ exports.renderSite = function ( event, context, callback ) {
 
             return speaker.getSpeakers();
         } )
-        .then( results => {
+        .then( res => {
 
-            speakers = results;
+            speakers = res;
 
             let pages = [];
 

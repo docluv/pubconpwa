@@ -22,7 +22,8 @@ exports.getSession = function ( options ) {
     }
 
     return data.getItem( {
-        id: options.id
+        id: options.id,
+        key: "api/sessions.json"
     }, apiURL, SESSION_KEY );
 
 };
@@ -31,7 +32,7 @@ exports.getSessions = function () {
 
     return data.getItems( {
         item_key: SESSION_KEY,
-        url: "api/sessions.json"
+        key: "api/sessions.json"
     } );
 
 };

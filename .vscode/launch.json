@@ -7,7 +7,7 @@
         "type": "node",
         "request": "launch",
         "name": "Launch Program",
-        "cwd": "${workspaceRoot}/bin/",
-        "program": "${workspaceFolder}\\bin\\parse-schedule.js"
+        "cwd": "${workspaceRoot}/lambdas/lambdas/",
+        "program": "${workspaceFolder}/lambdas/lambdas/test/render-site.js"
     } ]
 }

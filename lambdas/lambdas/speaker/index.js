@@ -1,47 +1,41 @@
 const data = require( "../data" );
 
 
-class SpeakerManager {
 
-    constructor() {
+const apiKey = "api/speakers.json",
 
-        this.apiKey = "api/speakers.json";
+    speakerTimesKey = "speaker-times",
+    savesSpeakers = "save-speakers",
 
-        this.speakerTimesKey = "speaker-times";
-        this.savesSpeakers = "save-speakers";
+    SPEAKER_KEY = "-speakers",
+    SPEAKER_STALE_KEY = SPEAKER_KEY + "-expires",
+    MAX_LIST_CACHE = 15,
 
-        this.SPEAKER_KEY = "-speakers";
-        this.SPEAKER_STALE_KEY = this.SPEAKER_KEY + "-expires";
-        this.MAX_LIST_CACHE = 15;
+    campSchedule = [],
+    selectedTimes = [
+        "08:30", "10:00", "11:30", "12:00", "13:30", "15:00"
+    ];
 
-        this.this.campSchedule = [];
-        this.this.selectedTimes = [
-            "08:30", "10:00", "11:30", "12:00", "13:30", "15:00"
-        ];
+exports.getSpeaker = function ( options ) {
 
-    }
+    if ( !options && ( !options.id ) ) {
 
-    getSpeaker( options ) {
-
-        if ( !options && ( !options.id ) ) {
-
-            return Promise.reject( "no valid speaker selection criteria supplied" );
-
-        }
-
-        return data.getItem( {
-            id: options.id,
-            key: apiKey
-        } );
+        return Promise.reject( "no valid speaker selection criteria supplied" );
 
     }
 
-    getSpeakers() {
+    return data.getItem( {
+        id: options.id,
+        key: apiKey
+    } );
 
-        return data.getItems( {
-            key: apiKey
-        } );
+};
 
-    }
+exports.getSpeakers = function () {
 
-}
+    return data.getItems( {
+        item_key: SPEAKER_KEY,
+        key: apiKey
+    } );
+
+};

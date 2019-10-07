@@ -343,6 +343,8 @@ module.exports = {
 
     readFile: function ( src ) {
 
+        src = path.resolve( src );
+
         if ( fs.existsSync( src ) ) {
 
             return stripBom( fs.readFileSync( src, utf8 ) );
