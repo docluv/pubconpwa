@@ -11,33 +11,7 @@
 
     function initialize() {
 
-        initFacetedSearch();
-
         initSearch();
-
-        pubcon.sessions.getSessions()
-            .then( function ( _sessions ) {
-
-                sessions = _sessions;
-
-                return loadSessionCardTemplate();
-
-            } )
-            .then( function () {
-
-                initMenuToggle();
-
-                if ( location.pathname === "/" ) {
-
-                    renderSearchResults( sessions );
-
-                } else {
-
-                    initSessionDetails();
-
-                }
-
-            } );
 
         if ( "serviceWorker" in navigator ) {
 

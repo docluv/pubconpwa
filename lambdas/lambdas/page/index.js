@@ -46,6 +46,9 @@ exports.renderPage = function ( slug, templateName, data ) {
                 gzip: true
             } );
 
+        } )
+        .catch( err => {
+            console.log( err );
         } );
 
 };

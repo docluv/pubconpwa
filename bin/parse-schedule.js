@@ -314,7 +314,6 @@ function calcTime( sessionDate, strTime ) {
 
 }
 
-
 function parseSessions() {
 
     schedule.forEach( (
@@ -347,22 +346,26 @@ function parseSessions() {
                     session[ 7 ].indexOf( "Keynote" ) === -1 &&
                     session[ 8 ].indexOf( "Track" ) === -1 ) ) {
 
+                let assetId = utils.randomId();
+
                 let _session = {
-                    "assetId": utils.randomId(),
+                    "assetId": assetId,
                     "title": session[ 6 ],
                     "location": session[ 8 ],
                     "moderator": session[ 10 ],
                     "date": "10/" + session[ 3 ] + "/2019",
                     "time": calcTime( session[ 3 ], session[ 2 ] ), //convert later
                     "type": session[ 11 ],
-                    "description": session[ 13 ].replace( /<p>|<\/p>|<li>|<\/li>|<br>/, "" )
+                    "room": session[ 8 ],
+                    "description": session[ 13 ]
+                        .replace( /<p>|<\/p>|<li>|<\/li>|<br>/, "" )
                         .replace( '\"', "" ).replace( '"', "" )
                         .replace( "	", "" ).replace( '    ', " " )
                         .replace( "  ", " " )
                         .replace( "  ", " " )
                         .replace( "  ", " " )
                         .replace( "  ", " " ).trim(),
-                    "speakers": getSessionSpeakers( session )
+                    "speakers": getSessionSpeakers( session, assetId )
                 };
 
                 if ( session[ 46 ] !== "" ) {
@@ -394,7 +397,7 @@ function parseSessions() {
 
 }
 
-function getSessionSpeakers( session ) {
+function getSessionSpeakers( session, assetId ) {
 
     let _speakers = speakers.filter( value => {
 
@@ -414,6 +417,15 @@ function getSessionSpeakers( session ) {
             assetId: speaker.assetId,
             name: speaker.name,
             mugshot: speaker.mugshot.replace( "https://www.pubcon.com/images/", "img/" )
+        } );
+
+        let speakerIndex = speakers.findIndex( s => {
+            return s.name === speaker.name;
+        } );
+
+        speakers[ speakerIndex ].sessions.push( {
+            assetId: assetId,
+            title: session[ 6 ]
         } );
 
     } );
@@ -505,15 +517,11 @@ function parseSpeakers() {
 
     } );
 
-    utils.createFile( "speakers.json",
-        JSON.stringify( speakers ), true );
-
 }
 
 function getInitials( str ) {
     return str.replace( " - ", " " ).split( " " ).map( ( n ) => n[ 0 ] ).join( "" ).substring( 0, 2 ).toUpperCase();
 }
-
 
 function onlyUnique( value, index, self ) {
     return self.indexOf( value ) === index;
@@ -537,5 +545,45 @@ function onlyUniqueSpeaker( data ) {
 
 }
 
+function getSpeakersSessions( speaker ) {
+
+    let _sessions = sessions.filter( session => {
+
+        return session.speakers.filter( s => {
+
+            return s.name === speaker.name;
+
+        } );
+
+    } );
+
+    console.log( _sessions.length );
+
+    let _session_speakers = [];
+
+    _sessions.forEach( session => {
+
+        _session_speakers.push( {
+            assetId: session.assetId,
+            title: session.title
+        } );
+
+    } );
+
+    return _session_speakers;
+
+}
+
 parseSpeakers();
 parseSessions();
+
+// for ( let index = 0; index < speakers.length; index++ ) {
+
+//     speakers[ index ].sessions = getSpeakersSessions( speakers[ index ] );
+
+// }
+
+console.log( speakers[ 1 ].sessions );
+
+utils.createFile( "speakers.json",
+    JSON.stringify( speakers ), true );

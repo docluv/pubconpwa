@@ -109,14 +109,35 @@ body {
     min-height: 3.25em;
 }
 
-.session-detail {
+.session-detail,
+.speaker-detail,
+.session-detail-container {
     padding: 2%;
+    margin: 6px auto;
 }
 
+.speaker-title,
 .session-title {
-    font-size: 1.25em;
-    border-bottom: #005c84 1px solid;
+    font-size: 1.35em;
+    font-weight: 600;
+    border-bottom: var(--site-primary-darker) 1px solid;
     padding-bottom: 6px;
+    margin-top: 6px;
+    margin-bottom: 24px;
+}
+
+.speaker-text a,
+.session-text a {
+    color: var(--site-dark-darker);
+}
+
+.session-box {
+    padding: 3px auto;
+    border-bottom: 1px solid var(--site-primary-dark);
+    display: block;
+    width: 100%;
+    min-height: 160px;
+    margin-top: 24px;
 }
 
 .full-size {

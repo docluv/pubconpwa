@@ -35,9 +35,13 @@ exports.renderSite = function ( event, context, callback ) {
 
             } );
 
-            pages.push( page.renderPage( "speakers/", "speakers", speakers ) );
+            pages.push( page.renderPage( "speakers/", "speakers", {
+                speakers: speakers
+            } ) );
             //render home page
-            pages.push( page.renderPage( "", "sessions", sessions ) );
+            pages.push( page.renderPage( "/", "sessions", {
+                sessions: sessions
+            } ) );
 
             return Promise.all( pages );
 

@@ -1,17 +1,18 @@
 <div class="session-detail">
     <h1 class="session-title">{{title}}</h1>
     <div class="session-details-container">
+        {{#speakers}}
         <p class="session-text">
-            <b>{{speaker}}</b> {{#badge}}
-            <span class="badge badge-primary">{{.}}</span>{{/badge}}</p>
+            <b><a href="speaker/{{assetId}}/" class="my-1 py-1">{{name}}</a></b></p>
+        {{/speakers}}
         <p class="session-text">
-            <b>{{time}} - {{#room}}{{.}}{{/room}}{{^room}}TBD{{/room}}</b>
+            <b>{{date}} : {{time.startStr}} - {{time.endStr}}</b>
         </p>
-    </div>
-    <div class="session-actions">
-        <input type="checkbox" name="cb{{id}}">
-        <label for="cb{{id}}" value="{{id}}" class="big-check">Schedule</label>
+        {{#room}}
+        <p class="session-text">{{.}}</p>
+        {{/room}}
+        {{^room}}<p class="session-text">TBD</p>{{/room}}
     </div>
     <div class="session-description">
-        {{{body}}}</div>
+        {{{description}}}</div>
 </div>

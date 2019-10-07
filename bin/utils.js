@@ -12,13 +12,16 @@ const randomChar = () => {
     return String.fromCharCode( 65 + Math.floor( Math.random() * 26 ) );
 };
 
+function getRandomInt( max ) {
+    return Math.floor( Math.random() * Math.floor( max ) );
+}
 
 module.exports = {
 
     utf8: utf8,
 
     randomId: function () {
-        return randomChar() + Date.now() + randomChar();
+        return randomChar() + Date.now() + getRandomInt( 123 ) + randomChar();
     },
 
     getHash: function ( data ) {
