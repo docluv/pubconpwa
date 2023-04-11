@@ -1,16 +1,12 @@
-importScripts( "js/libs/localforage.min.js",
-    "js/libs/mustache.min.js" );
-
-
+importScripts("js/libs/localforage.min.js",
+    "js/libs/mustache.min.js");
 
 
 const version = "0.02",
     preCache = "PRECACHE-" + version,
-    cacheList = [ "/",
+    cacheList = ["/",
         "speakers/",
-        "speaker/",
         "sessions/",
-        "session/",
         "profile/",
         "about/",
         "img/pubcon-logo-1200x334.png", "img/pubcon-logo-992x276.png", "img/pubcon-logo-768x214.png", "img/pubcon-logo-576x160.png", "img/pubcon-logo-460x128.png", "img/pubcon-logo-320x89.png",
@@ -49,117 +45,115 @@ const version = "0.02",
     UPDATE_FAVORITES = "update-favorites",
     MAX_LIST_CACHE = 120;
 
-self.addEventListener( "install", function ( event ) {
+self.addEventListener("install", async function (event) {
 
-    console.log( "Installing the service worker!" );
+    console.log("Installing the service worker!");
 
     self.skipWaiting();
 
     event.waitUntil(
 
-        caches.open( preCache )
-        .then( cache => {
+        caches.open(preCache).then(async function (cache) {
 
-            cacheList.forEach( url => {
+            for (const url of cacheList) {
 
-                fetch( url )
-                    .then( function ( response ) {
-                        if ( !response.ok ) {
-                            throw new TypeError( 'bad response status - ' + response.url );
-                        }
-                        return cache.put( url, response );
-                    } )
-                    .catch( err => {
-                        console.error( err );
-                    } );
+                try {
 
-            } );
+                    const response = await fetch(url);
 
-        } )
-
-    );
-
-} );
-
-self.addEventListener( "activate", function ( event ) {
-
-    event.waitUntil(
-
-        //wholesale purge of previous version caches
-        caches.keys().then( cacheNames => {
-            cacheNames.forEach( value => {
-
-                if ( value.indexOf( version ) < 0 ) {
-                    caches.delete( value );
-                }
-
-            } );
-
-            console.log( "service worker activated" );
-
-            return;
-
-        } )
-        .then( () => {
-
-            return getTemplates();
-
-        } )
-        .then( () => {
-
-            return updateCachedData();
-
-        } )
-        .then( () => {
-
-            return renderSite();
-        } )
-
-    );
-
-} );
-
-self.addEventListener( "fetch", function ( event ) {
-
-    event.respondWith(
-
-        caches.match( event.request )
-        .then( function ( response ) {
-
-            if ( response ) {
-                return response;
-            }
-
-            return fetch( event.request )
-                .then( response => {
-
-                    if ( response && response.ok ) {
-
-                        return caches.open( "pubcon" )
-                            .then( cache => {
-                                return cache.put( event.request, response.clone() );
-                            } )
-                            .then( () => {
-                                return response;
-                            } );
-
-
-                    } else {
-
-                        //offline fallback
+                    if (!response.ok) {
+                        throw new TypeError("bad response status - " + response.url);
                     }
 
-                } );
-        } )
+                    await cache.put(url, response);
 
+                } catch (error) {
+
+                    console.error(error);
+
+                }
+
+            }
+
+        })
 
     );
 
-} );
+});
 
-self.addEventListener( "message", event => {
 
-    switch ( event.data.event ) {
+self.addEventListener("activate", async function (event) {
+
+    event.waitUntil(async () => {
+        // Purge caches for previous versions
+        const cacheNames = await caches.keys();
+
+        for (const value of cacheNames) {
+            if (value.indexOf(version) < 0) {
+                await caches.delete(value);
+            }
+        }
+
+        console.log("Service worker activated");
+
+        try {
+
+            await getTemplates();
+            await updateCachedData();
+            await renderSite();
+            await updatefavorites();
+
+        } catch (error) {
+            console.error(error);
+        }
+
+    });
+
+});
+
+
+self.addEventListener("fetch", async function (event) {
+   
+    event.respondWith(
+
+        (async () => {
+
+            const cacheResponse = await caches.match(event.request);
+
+            if (cacheResponse) {
+                return cacheResponse;
+            }
+
+            try {
+
+                const fetchResponse = await fetch(event.request);
+
+                if (fetchResponse && fetchResponse.ok) {
+
+                    const cache = await caches.open("pubcon");
+                    await cache.put(event.request, fetchResponse.clone());
+
+                    return fetchResponse;
+
+                } else {
+                    // offline fallback
+                    console.error("Fetch error: ", fetchResponse.status);
+                }
+
+            } catch (error) {
+                console.error("Fetch error: ", error);
+            }
+
+        })()
+
+    );
+
+});
+
+
+self.addEventListener("message", event => {
+
+    switch (event.data.event) {
 
         case UPDATE_DATA:
 
@@ -168,7 +162,7 @@ self.addEventListener( "message", event => {
 
         case OFFLINE_MSG_KEY:
 
-            toggleOffline( event.data.state );
+            toggleOffline(event.data.state);
 
             break;
 
@@ -179,12 +173,12 @@ self.addEventListener( "message", event => {
             break;
         default:
 
-            console.log( event );
+            console.log(event);
 
             break;
     }
 
-} );
+});
 
 
 /*
@@ -196,168 +190,112 @@ self.addEventListener( "message", event => {
 */
 
 
-function renderSite() {
+async function renderSite() {
 
-    let speakers = [],
-        sessions = [];
+    try {
 
-    return localforage.getItem( SESSION_KEY )
-        .then( results => {
+        const sessions = await localforage.getItem(SESSION_KEY);
 
-            sessions = results;
+        const speakers = await localforage.getItem(SPEAKER_KEY);
 
-            return localforage.getItem( SPEAKER_KEY );
-        } )
-        .then( res => {
+        const pages = [];
 
-            speakers = res;
+        sessions.forEach((session) => {
+            pages.push(renderPage(`session/${session.assetId}/`, "session", session));
+        });
 
-            let pages = [];
+        speakers.forEach((speaker) => {
+            pages.push(renderPage(`speaker/${speaker.assetId}/`, "speaker", speaker));
+        });
 
-            sessions.forEach( session => {
+        pages.push(renderPage("speakers/", "speakers", { speakers }));
 
-                pages.push( renderPage( "session/" +
-                    session.assetId + "/", "session", session ) );
+        pages.push(renderPage(location.origin, "sessions", { sessions }));
 
-            } );
+        const results = await Promise.all(pages);
 
-            speakers.forEach( speaker => {
+        console.log("site updated");
 
-                pages.push( renderPage( "speaker/" +
-                    speaker.assetId + "/", "speaker", speaker ) );
+        await updatefavorites();
 
-            } );
-
-            pages.push( renderPage( "speakers/", "speakers", {
-                speakers: speakers
-            } ) );
-
-            //render home page
-            pages.push( renderPage( location.origin, "sessions", {
-                sessions: sessions
-            } ) );
-
-            return Promise.all( pages );
-
-        } )
-        .then( results => {
-
-            console.log( "site updated" );
-
-        } )
-        .then( updatefavorites )
-        .catch( err => {
-
-            console.error( err );
-
-        } );
+    } catch (error) {
+        console.error(error);
+    }
 
 }
+
 
 let templates = {};
 
 function getTemplates() {
 
-    return getHTMLAsset( "templates/session-list.html" )
-        .then( html => {
+    return getHTMLAsset("templates/session-list.html")
+        .then(html => {
             templates.sessions = html;
-        } )
-        .then( () => {
+        })
+        .then(() => {
 
-            return getHTMLAsset( "templates/session.html" )
-                .then( html => {
+            return getHTMLAsset("templates/session.html")
+                .then(html => {
                     templates.session = html;
-                } );
+                });
 
-        } )
-        .then( () => {
+        })
+        .then(() => {
 
-            return getHTMLAsset( "templates/shell.html" )
-                .then( html => {
+            return getHTMLAsset("templates/shell.html")
+                .then(html => {
                     templates.shell = html;
-                } );
+                });
 
-        } )
-        .then( () => {
+        })
+        .then(() => {
 
-            return getHTMLAsset( "templates/speaker-list.html" )
-                .then( html => {
+            return getHTMLAsset("templates/speaker-list.html")
+                .then(html => {
                     templates.speakers = html;
-                } );
+                });
 
-        } )
-        .then( () => {
+        })
+        .then(() => {
 
-            return getHTMLAsset( "templates/speaker.html" )
-                .then( html => {
+            return getHTMLAsset("templates/speaker.html")
+                .then(html => {
                     templates.speaker = html;
-                } );
+                });
 
-        } );
+        });
 
 }
 
-function renderPage( slug, templateName, data ) {
+function renderPage(slug, templateName, data) {
 
-    let pageTemplate = templates[ templateName ];
+    let pageTemplate = templates[templateName];
 
-    let template = templates.shell.replace( "<%template%>", pageTemplate );
+    let template = templates.shell.replace("<%template%>", pageTemplate);
 
-    pageHTML = Mustache.render( template, data );
+    pageHTML = Mustache.render(template, data);
 
-    let response = new Response( pageHTML, {
+    let response = new Response(pageHTML, {
         headers: {
             "content-type": "text/html",
             "date": new Date().toLocaleString()
         }
-    } );
+    });
 
-    return caches.open( "pubcon" )
-        .then( cache => {
-            cache.put( slug, response );
-        } );
+    return caches.open("pubcon")
+        .then(cache => {
+            cache.put(slug, response);
+        });
 
 }
 
 function updateCachedData() {
 
-    return fetch( "api/sessions.json" )
-        .then( response => {
+    return fetch("api/sessions.json")
+        .then(response => {
 
-            if ( response && response.ok ) {
-
-                return response.json();
-
-            } else {
-                throw {
-                    status: response.status,
-                    message: "failed to fetch session data"
-                };
-            }
-
-        } )
-        .then( sessions => {
-
-            return localforage.setItem( SESSION_KEY, sessions );
-
-        } )
-        .then( () => {
-
-            var dt = new Date();
-
-            dt.setMinutes( dt.getMinutes() + MAX_LIST_CACHE );
-
-            return localforage
-                .setItem( SESSION_KEY + STALE_KEY, dt );
-
-        } )
-        .then( () => {
-
-            return fetch( "api/speakers.json" )
-        } )
-        .then( response => {
-
-            if ( response && response.ok ) {
+            if (response && response.ok) {
 
                 return response.json();
 
@@ -368,107 +306,140 @@ function updateCachedData() {
                 };
             }
 
-        } )
-        .then( speakers => {
+        })
+        .then(sessions => {
 
-            return localforage.setItem( SPEAKER_KEY, speakers );
+            return localforage.setItem(SESSION_KEY, sessions);
 
-        } )
-        .then( () => {
+        })
+        .then(() => {
 
             var dt = new Date();
 
-            dt.setMinutes( dt.getMinutes() + MAX_LIST_CACHE );
+            dt.setMinutes(dt.getMinutes() + MAX_LIST_CACHE);
 
             return localforage
-                .setItem( SPEAKER_KEY + STALE_KEY, dt );
+                .setItem(SESSION_KEY + STALE_KEY, dt);
 
-        } );
+        })
+        .then(() => {
+
+            return fetch("api/speakers.json")
+        })
+        .then(response => {
+
+            if (response && response.ok) {
+
+                return response.json();
+
+            } else {
+                throw {
+                    status: response.status,
+                    message: "failed to fetch session data"
+                };
+            }
+
+        })
+        .then(speakers => {
+
+            return localforage.setItem(SPEAKER_KEY, speakers);
+
+        })
+        .then(() => {
+
+            var dt = new Date();
+
+            dt.setMinutes(dt.getMinutes() + MAX_LIST_CACHE);
+
+            return localforage
+                .setItem(SPEAKER_KEY + STALE_KEY, dt);
+
+        });
 
 }
 
 function updatefavorites() {
 
     return getFavorites()
-        .then( favorites => {
+        .then(favorites => {
 
             let actions = [];
 
-            favorites.forEach( id => {
+            favorites.forEach(id => {
 
-                actions.push( getSessionById( id ) );
+                actions.push(getSessionById(id));
 
-            } );
+            });
 
-            return Promise.all( actions );
+            return Promise.all(actions);
 
-        } )
-        .then( sessions => {
+        })
+        .then(sessions => {
 
-            return renderPage( "favorites/", "sessions", {
+            return renderPage("favorites/", "sessions", {
                 sessions: sessions
-            } );
+            });
 
-        } );
+        });
 
 }
 
 function getFavorites() {
 
-    return localforage.getItem( FAVORITES_KEY )
-        .then( function ( favorites ) {
+    return localforage.getItem(FAVORITES_KEY)
+        .then(function (favorites) {
 
-            if ( !favorites ) {
+            if (!favorites) {
                 favorites = [];
             }
 
             return favorites;
 
-        } );
+        });
 
 }
 
-function getSessionById( id ) {
+function getSessionById(id) {
 
-    return localforage.getItem( SESSION_KEY )
-        .then( sessions => {
+    return localforage.getItem(SESSION_KEY)
+        .then(sessions => {
 
-            return sessions.find( session => {
+            return sessions.find(session => {
 
                 return session.assetId === id;
-            } );
+            });
 
-        } );
+        });
 
 }
 
-function send_message_to_client( client, msg ) {
-    return new Promise( function ( resolve, reject ) {
+function send_message_to_client(client, msg) {
+    return new Promise(function (resolve, reject) {
         var msg_chan = new MessageChannel();
 
-        msg_chan.port1.onmessage = function ( event ) {
-            if ( event.data.error ) {
-                reject( event.data.error );
+        msg_chan.port1.onmessage = function (event) {
+            if (event.data.error) {
+                reject(event.data.error);
             } else {
-                resolve( event.data );
+                resolve(event.data);
             }
         };
 
-        client.postMessage( msg, [ msg_chan.port2 ] );
-    } );
+        client.postMessage(msg, [msg_chan.port2]);
+    });
 }
 
-function getHTMLAsset( slug ) {
+function getHTMLAsset(slug) {
 
-    return caches.match( slug )
-        .then( response => {
+    return caches.match(slug)
+        .then(response => {
 
-            if ( response ) {
+            if (response) {
 
                 return response.text();
 
             }
 
-        } );
+        });
 
 }
