@@ -151,13 +151,13 @@ self.addEventListener("fetch", async function (event) {
 });
 
 
-self.addEventListener("message", event => {
+self.addEventListener("message", async event => {
 
     switch (event.data.event) {
 
         case UPDATE_DATA:
 
-            updateCachedData();
+            await updateCachedData();
             break;
 
         case OFFLINE_MSG_KEY:
@@ -168,7 +168,7 @@ self.addEventListener("message", event => {
 
         case UPDATE_FAVORITES:
 
-            updatefavorites();
+            await updatefavorites();
 
             break;
         default:
@@ -224,222 +224,163 @@ async function renderSite() {
 
 }
 
+async function getTemplates() {
 
-let templates = {};
+    try {
 
-function getTemplates() {
+        templates.sessions = await getHTMLAsset("templates/session-list.html");
 
-    return getHTMLAsset("templates/session-list.html")
-        .then(html => {
-            templates.sessions = html;
-        })
-        .then(() => {
+        templates.session = await getHTMLAsset("templates/session.html");
 
-            return getHTMLAsset("templates/session.html")
-                .then(html => {
-                    templates.session = html;
-                });
+        templates.shell = await getHTMLAsset("templates/shell.html");
 
-        })
-        .then(() => {
+        templates.speakers = await getHTMLAsset("templates/speaker-list.html");
 
-            return getHTMLAsset("templates/shell.html")
-                .then(html => {
-                    templates.shell = html;
-                });
+        templates.speaker = await getHTMLAsset("templates/speaker.html");
 
-        })
-        .then(() => {
-
-            return getHTMLAsset("templates/speaker-list.html")
-                .then(html => {
-                    templates.speakers = html;
-                });
-
-        })
-        .then(() => {
-
-            return getHTMLAsset("templates/speaker.html")
-                .then(html => {
-                    templates.speaker = html;
-                });
-
-        });
-
+    } catch (err) {
+        console.error(err);
+    }
 }
 
-function renderPage(slug, templateName, data) {
+async function renderPage(slug, templateName, data) {
 
-    let pageTemplate = templates[templateName];
+    const pageTemplate = templates[templateName];
+    const template = templates.shell.replace("<%template%>", pageTemplate);
+    const pageHTML = Mustache.render(template, data);
 
-    let template = templates.shell.replace("<%template%>", pageTemplate);
-
-    pageHTML = Mustache.render(template, data);
-
-    let response = new Response(pageHTML, {
+    const response = new Response(pageHTML, {
         headers: {
             "content-type": "text/html",
             "date": new Date().toLocaleString()
         }
     });
 
-    return caches.open("pubcon")
-        .then(cache => {
-            cache.put(slug, response);
-        });
+    const cache = await caches.open("pubcon");
+    
+    await cache.put(slug, response);
 
 }
 
-function updateCachedData() {
+async function updateCachedData() {
 
-    return fetch("api/sessions.json")
-        .then(response => {
+    try {
 
-            if (response && response.ok) {
+        const sessionsResponse = await fetch("api/sessions.json");
 
-                return response.json();
+        if (sessionsResponse.ok) {
+   
+            const sessions = await sessionsResponse.json();
+   
+            await localforage.setItem(SESSION_KEY, sessions);
 
-            } else {
-                throw {
-                    status: response.status,
-                    message: "failed to fetch session data"
-                };
-            }
-
-        })
-        .then(sessions => {
-
-            return localforage.setItem(SESSION_KEY, sessions);
-
-        })
-        .then(() => {
-
-            var dt = new Date();
-
+            const dt = new Date();
             dt.setMinutes(dt.getMinutes() + MAX_LIST_CACHE);
+  
+            await localforage.setItem(SESSION_KEY + STALE_KEY, dt);
+   
+        } else {
+   
+            throw {
+                status: sessionsResponse.status,
+                message: "failed to fetch session data"
+            };
+   
+        }
 
-            return localforage
-                .setItem(SESSION_KEY + STALE_KEY, dt);
+        const speakersResponse = await fetch("api/speakers.json");
 
-        })
-        .then(() => {
+        if (speakersResponse.ok) {
+  
+            const speakers = await speakersResponse.json();
+            await localforage.setItem(SPEAKER_KEY, speakers);
 
-            return fetch("api/speakers.json")
-        })
-        .then(response => {
-
-            if (response && response.ok) {
-
-                return response.json();
-
-            } else {
-                throw {
-                    status: response.status,
-                    message: "failed to fetch session data"
-                };
-            }
-
-        })
-        .then(speakers => {
-
-            return localforage.setItem(SPEAKER_KEY, speakers);
-
-        })
-        .then(() => {
-
-            var dt = new Date();
-
+            const dt = new Date();
             dt.setMinutes(dt.getMinutes() + MAX_LIST_CACHE);
+  
+            await localforage.setItem(SPEAKER_KEY + STALE_KEY, dt);
+  
+        } else {
+  
+            throw {
+                status: speakersResponse.status,
+                message: "failed to fetch speaker data"
+            };
+  
+        }
 
-            return localforage
-                .setItem(SPEAKER_KEY + STALE_KEY, dt);
-
-        });
-
-}
-
-function updatefavorites() {
-
-    return getFavorites()
-        .then(favorites => {
-
-            let actions = [];
-
-            favorites.forEach(id => {
-
-                actions.push(getSessionById(id));
-
-            });
-
-            return Promise.all(actions);
-
-        })
-        .then(sessions => {
-
-            return renderPage("favorites/", "sessions", {
-                sessions: sessions
-            });
-
-        });
+    } catch (error) {
+        console.error(error);
+    }
 
 }
 
-function getFavorites() {
+const updateFavorites = async () => {
 
-    return localforage.getItem(FAVORITES_KEY)
-        .then(function (favorites) {
-
-            if (!favorites) {
-                favorites = [];
-            }
-
-            return favorites;
-
-        });
-
-}
-
-function getSessionById(id) {
-
-    return localforage.getItem(SESSION_KEY)
-        .then(sessions => {
-
-            return sessions.find(session => {
-
-                return session.assetId === id;
-            });
-
-        });
+    try {
+   
+        const favorites = await getFavorites();
+        const sessions = await Promise.all(favorites.map(id => getSessionById(id)));
+   
+        await renderPage("favorites/", "sessions", { sessions });
+   
+    } catch (error) {
+        console.error(error);
+    }
 
 }
 
-function send_message_to_client(client, msg) {
-    return new Promise(function (resolve, reject) {
-        var msg_chan = new MessageChannel();
+async function getFavorites() {
+    const favorites = await localforage.getItem(FAVORITES_KEY) || [];
+    return favorites;
+}
 
-        msg_chan.port1.onmessage = function (event) {
+async function getSessionById(id) {
+
+    try {
+
+        const sessions = await localforage.getItem(SESSION_KEY);
+        const session = sessions.find(session => session.assetId === id);
+
+        return session;
+
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+
+}
+
+async function sendMessageToClient(client, msg) {
+
+    const msgChan = new MessageChannel();
+    
+    const messagePromise = new Promise((resolve, reject) => {
+    
+        msgChan.port1.onmessage = event => {
+    
             if (event.data.error) {
                 reject(event.data.error);
             } else {
                 resolve(event.data);
             }
+    
         };
-
-        client.postMessage(msg, [msg_chan.port2]);
+    
     });
+    
+    client.postMessage(msg, [msgChan.port2]);
+    
+    return messagePromise;
+
 }
 
-function getHTMLAsset(slug) {
+async function getHTMLAsset(slug) {
 
-    return caches.match(slug)
-        .then(response => {
+    const response = await caches.match(slug);
 
-            if (response) {
-
-                return response.text();
-
-            }
-
-        });
+    if (response) {
+        return response.text();
+    }
 
 }
